@@ -1,0 +1,311 @@
+text,label
+Prepare discharge summary for ward 5,CREATE_TASK
+Assign Rahul to monitor ICU bed 3,CREATE_TASK
+Schedule surgery follow up for patient in ward 2,CREATE_TASK
+Prepare medication chart for room 12,CREATE_TASK
+Update vitals log for ICU patient 4,CREATE_TASK
+Complete ward 7 patient documentation,CREATE_TASK
+Check oxygen supply in ICU section B,CREATE_TASK
+Prepare OT equipment checklist,CREATE_TASK
+Review lab results for patient 102,CREATE_TASK
+Arrange stretcher support for ward 3,CREATE_TASK
+Collect reports from pathology,CREATE_TASK
+Schedule MRI scan coordination,CREATE_TASK
+Prepare nursing duty allocation sheet,CREATE_TASK
+Update infection control log,CREATE_TASK
+Assign junior doctor to emergency desk,CREATE_TASK
+Prepare discharge file for room 9,CREATE_TASK
+Review patient transfer paperwork,CREATE_TASK
+Check pharmacy inventory levels,CREATE_TASK
+Prepare IV medication list,CREATE_TASK
+Monitor ICU ventilator status,CREATE_TASK
+Prepare surgery consent documentation,CREATE_TASK
+Organize ward round briefing notes,CREATE_TASK
+Collect patient feedback forms,CREATE_TASK
+Review admission forms for ward 6,CREATE_TASK
+Coordinate ambulance arrival timing,CREATE_TASK
+Prepare blood request form,CREATE_TASK
+Update nurse shift attendance,CREATE_TASK
+Review test reports for ward 8,CREATE_TASK
+Schedule patient discharge clearance,CREATE_TASK
+Arrange surgical instrument sterilization,CREATE_TASK
+Assign nurse for ward 10 monitoring,CREATE_TASK
+Prepare bed allocation list,CREATE_TASK
+Check ECG machine functionality,CREATE_TASK
+Update daily treatment summary,CREATE_TASK
+Prepare ward 4 discharge summary,CREATE_TASK
+Review emergency room admissions,CREATE_TASK
+Arrange patient diet chart updates,CREATE_TASK
+Update ICU equipment log,CREATE_TASK
+Prepare handover notes for next shift,CREATE_TASK
+Review pending lab tests,CREATE_TASK
+Coordinate blood sample transport,CREATE_TASK
+Prepare oxygen cylinder refill list,CREATE_TASK
+Assign staff for patient observation,CREATE_TASK
+Prepare wound dressing materials,CREATE_TASK
+Schedule patient follow up call,CREATE_TASK
+Check availability of surgical kits,CREATE_TASK
+Prepare ward cleanliness checklist,CREATE_TASK
+Review medication dosage adjustments,CREATE_TASK
+Update patient progress notes,CREATE_TASK
+Coordinate ICU bed assignment,CREATE_TASK
+Prepare discharge summary for T-2020 patient,CREATE_TASK
+Organize OT schedule for today,CREATE_TASK
+Prepare emergency supply checklist,CREATE_TASK
+Assign team for trauma case monitoring,CREATE_TASK
+Prepare blood transfusion record,CREATE_TASK
+Review operation theatre preparation,CREATE_TASK
+Update ICU case summary board,CREATE_TASK
+Prepare patient transfer summary,CREATE_TASK
+Schedule wound review session,CREATE_TASK
+Assign monitoring duty for ward 1,CREATE_TASK
+Prepare ventilator usage report,CREATE_TASK
+Review pending discharge approvals,CREATE_TASK
+Prepare emergency admission documentation,CREATE_TASK
+Update surgical inventory report,CREATE_TASK
+Prepare medication restock list,CREATE_TASK
+Coordinate lab sample collection,CREATE_TASK
+Assign doctor for ward 12 supervision,CREATE_TASK
+Prepare daily case review list,CREATE_TASK
+Update ward maintenance checklist,CREATE_TASK
+Prepare patient billing documentation,CREATE_TASK
+T-1001 completed,COMPLETE_TASK
+T-1002 completed,COMPLETE_TASK
+T-1003 completed,COMPLETE_TASK
+T-1004 completed,COMPLETE_TASK
+T-1005 completed,COMPLETE_TASK
+T-1006 completed,COMPLETE_TASK
+T-1007 completed,COMPLETE_TASK
+T-1008 completed,COMPLETE_TASK
+T-1009 completed,COMPLETE_TASK
+T-1010 completed,COMPLETE_TASK
+T-1011 completed,COMPLETE_TASK
+T-1012 completed,COMPLETE_TASK
+T-1013 completed,COMPLETE_TASK
+T-1014 completed,COMPLETE_TASK
+T-1015 completed,COMPLETE_TASK
+T-1016 completed,COMPLETE_TASK
+T-1017 completed,COMPLETE_TASK
+T-1018 completed,COMPLETE_TASK
+T-1019 completed,COMPLETE_TASK
+T-1020 completed,COMPLETE_TASK
+T-1021 completed,COMPLETE_TASK
+T-1022 completed,COMPLETE_TASK
+T-1023 completed,COMPLETE_TASK
+T-1024 completed,COMPLETE_TASK
+T-1025 completed,COMPLETE_TASK
+T-1026 completed,COMPLETE_TASK
+T-1027 completed,COMPLETE_TASK
+T-1028 completed,COMPLETE_TASK
+T-1029 completed,COMPLETE_TASK
+T-1030 completed,COMPLETE_TASK
+T-1031 completed,COMPLETE_TASK
+T-1032 completed,COMPLETE_TASK
+T-1033 completed,COMPLETE_TASK
+T-1034 completed,COMPLETE_TASK
+T-1035 completed,COMPLETE_TASK
+T-1036 completed,COMPLETE_TASK
+T-1037 completed,COMPLETE_TASK
+T-1038 completed,COMPLETE_TASK
+T-1039 completed,COMPLETE_TASK
+T-1040 completed,COMPLETE_TASK
+T-1041 completed,COMPLETE_TASK
+T-1042 completed,COMPLETE_TASK
+T-1043 completed,COMPLETE_TASK
+T-1044 completed,COMPLETE_TASK
+T-1045 completed,COMPLETE_TASK
+T-1046 completed,COMPLETE_TASK
+T-1047 completed,COMPLETE_TASK
+T-1048 completed,COMPLETE_TASK
+T-1049 completed,COMPLETE_TASK
+T-1050 completed,COMPLETE_TASK
+T-1051 completed,COMPLETE_TASK
+T-1052 completed,COMPLETE_TASK
+T-1053 completed,COMPLETE_TASK
+T-1054 completed,COMPLETE_TASK
+T-1055 completed,COMPLETE_TASK
+T-1056 completed,COMPLETE_TASK
+T-1057 completed,COMPLETE_TASK
+T-1058 completed,COMPLETE_TASK
+T-1059 completed,COMPLETE_TASK
+T-1060 completed,COMPLETE_TASK
+T-2001 lab results pending,BLOCK_TASK
+T-2002 missing documentation,BLOCK_TASK
+T-2003 awaiting senior approval,BLOCK_TASK
+T-2004 supply not available,BLOCK_TASK
+T-2005 equipment issue,BLOCK_TASK
+T-2006 pending pharmacy confirmation,BLOCK_TASK
+T-2007 radiology delay,BLOCK_TASK
+T-2008 no ICU bed available,BLOCK_TASK
+T-2009 awaiting consent form,BLOCK_TASK
+T-2010 file incomplete,BLOCK_TASK
+T-2011 blood unit unavailable,BLOCK_TASK
+T-2012 diagnostic results pending,BLOCK_TASK
+T-2013 system outage,BLOCK_TASK
+T-2014 awaiting authorization,BLOCK_TASK
+T-2015 medication shortage,BLOCK_TASK
+T-2016 waiting for lab report,BLOCK_TASK
+T-2017 lab results pending,BLOCK_TASK
+T-2018 missing documentation,BLOCK_TASK
+T-2019 awaiting senior approval,BLOCK_TASK
+T-2020 supply not available,BLOCK_TASK
+T-2021 equipment issue,BLOCK_TASK
+T-2022 pending pharmacy confirmation,BLOCK_TASK
+T-2023 radiology delay,BLOCK_TASK
+T-2024 no ICU bed available,BLOCK_TASK
+T-2025 awaiting consent form,BLOCK_TASK
+T-2026 file incomplete,BLOCK_TASK
+T-2027 blood unit unavailable,BLOCK_TASK
+T-2028 diagnostic results pending,BLOCK_TASK
+T-2029 system outage,BLOCK_TASK
+T-2030 awaiting authorization,BLOCK_TASK
+T-2031 medication shortage,BLOCK_TASK
+T-2032 waiting for lab report,BLOCK_TASK
+T-2033 lab results pending,BLOCK_TASK
+T-2034 missing documentation,BLOCK_TASK
+T-2035 awaiting senior approval,BLOCK_TASK
+T-2036 supply not available,BLOCK_TASK
+T-2037 equipment issue,BLOCK_TASK
+T-2038 pending pharmacy confirmation,BLOCK_TASK
+T-2039 radiology delay,BLOCK_TASK
+T-2040 no ICU bed available,BLOCK_TASK
+T-2041 awaiting consent form,BLOCK_TASK
+T-2042 file incomplete,BLOCK_TASK
+T-2043 blood unit unavailable,BLOCK_TASK
+T-2044 diagnostic results pending,BLOCK_TASK
+T-2045 system outage,BLOCK_TASK
+T-2046 awaiting authorization,BLOCK_TASK
+T-2047 medication shortage,BLOCK_TASK
+T-2048 waiting for lab report,BLOCK_TASK
+T-2049 lab results pending,BLOCK_TASK
+T-2050 missing documentation,BLOCK_TASK
+T-2051 awaiting senior approval,BLOCK_TASK
+T-2052 supply not available,BLOCK_TASK
+T-2053 equipment issue,BLOCK_TASK
+T-2054 pending pharmacy confirmation,BLOCK_TASK
+T-2055 radiology delay,BLOCK_TASK
+T-2056 no ICU bed available,BLOCK_TASK
+T-2057 awaiting consent form,BLOCK_TASK
+T-2058 file incomplete,BLOCK_TASK
+T-2059 blood unit unavailable,BLOCK_TASK
+T-2060 diagnostic results pending,BLOCK_TASK
+Emergency in ward 3,ALERT
+Code blue in ICU,ALERT
+Oxygen pressure drop detected,ALERT
+Critical patient admitted,ALERT
+Ventilator malfunction alert,ALERT
+Fire alarm triggered,ALERT
+Power backup failure,ALERT
+ICU monitor not responding,ALERT
+Emergency trauma case incoming,ALERT
+Blood bank shortage alert,ALERT
+Sudden cardiac arrest case,ALERT
+Critical supply stock low,ALERT
+Major equipment failure,ALERT
+Severe infection case reported,ALERT
+Emergency surgery required,ALERT
+Patient collapse in ward 2,ALERT
+High fever outbreak alert,ALERT
+Rapid response team required,ALERT
+Emergency admission in ER,ALERT
+Major lab outage detected,ALERT
+Ambulance arrival alert,ALERT
+ICU overload warning,ALERT
+Critical medication shortage,ALERT
+Emergency ventilator request,ALERT
+Urgent surgical case admitted,ALERT
+Code red declared,ALERT
+Hospital-wide system alert,ALERT
+Emergency power disruption,ALERT
+Severe trauma case reported,ALERT
+ICU emergency escalation,ALERT
+Okay noted,OTHER
+Thanks,OTHER
+Received,OTHER
+Will check,OTHER
+Understood,OTHER
+Noted,OTHER
+Okay,OTHER
+Fine,OTHER
+Got it,OTHER
+Acknowledged,OTHER
+Sure,OTHER
+Thanks for update,OTHER
+Will do,OTHER
+Okay thanks,OTHER
+Understood clearly,OTHER
+Yes,OTHER
+No problem,OTHER
+All good,OTHER
+Copy that,OTHER
+Seen,OTHER
+Alright,OTHER
+Will update later,OTHER
+Proceeding,OTHER
+Done for now,OTHER
+Yes understood,OTHER
+Thanks acknowledged,OTHER
+Message received,OTHER
+Okay confirmed,OTHER
+Alright noted,OTHER
+Understood thanks,OTHER
+Emergency in ICU,ALERT
+Code blue,ALERT
+Code blue in ward 3,ALERT
+Cardiac arrest,ALERT
+Rapid response required,ALERT
+Patient collapse,ALERT
+Critical case,ALERT
+Oxygen failure,ALERT
+Ventilator failure,ALERT
+Life threatening situation,ALERT
+Severe trauma case,ALERT
+Emergency surgery required,ALERT
+ICU emergency,ALERT
+Critical emergency,ALERT
+Urgent medical emergency,ALERT
+Immediate assistance required,ALERT
+Code red declared,ALERT
+Major bleeding case,ALERT
+Unresponsive patient,ALERT
+Septic shock case,ALERT
+Emergency in ward 5,ALERT
+Cardiac arrest in ICU bed 4,ALERT
+Rapid response team needed in ward 2,ALERT
+Critical oxygen drop detected,ALERT
+Ventilator malfunction in ICU,ALERT
+Patient collapsed in ward 7,ALERT
+Life threatening infection detected,ALERT
+Critical trauma admission,ALERT
+Emergency blood transfusion required,ALERT
+ICU overload warning,ALERT
+Emergency admission in ER,ALERT
+Severe head injury case,ALERT
+Immediate cardiac intervention required,ALERT
+Major internal bleeding detected,ALERT
+Code blue activated in ICU,ALERT
+Critical condition patient admitted,ALERT
+Urgent life support required,ALERT
+Emergency ventilator support needed,ALERT
+Severe infection outbreak alert,ALERT
+Critical power failure in ICU,ALERT
+Emergency situation in ICU requiring immediate attention,ALERT
+Rapid response team required urgently in ward 4,ALERT
+Critical oxygen supply failure detected in ICU,ALERT
+Ventilator system failure affecting patient care,ALERT
+Patient experienced cardiac arrest in ward 3,ALERT
+Severe trauma patient admitted to emergency unit,ALERT
+Life threatening condition identified in ICU,ALERT
+Major equipment malfunction in operation theatre,ALERT
+Critical supply shortage affecting emergency cases,ALERT
+Emergency power disruption in ICU section,ALERT
+Immediate medical intervention required for patient,ALERT
+Unstable patient condition detected in ICU,ALERT
+Critical blood shortage alert in hospital,ALERT
+Emergency escalation required for ICU case,ALERT
+High risk emergency case admitted,ALERT
+Severe respiratory failure case,ALERT
+Code blue situation ongoing in ward 6,ALERT
+Emergency airway management required,ALERT
+Critical status patient needs immediate care,ALERT
+Urgent life saving procedure required,ALERT
