@@ -1,94 +1,103 @@
 import os
-import re
-from transformers import pipeline
+import json
+import google.generativeai as genai
+from pydantic import BaseModel, Field
+from typing import Optional, Literal
+from config import GEMINI_API_KEY
 
-class MediStreamNLP:
-    """
-    Phase 3: NLP Engine Integration (Singleton)
-    Loads HuggingFace DistilBERT pipelines strictly ONCE at startup to avoid re-loading on every API call.
-    Strictly pure signal extraction. Does not mutate DB.
-    """
-    _instance = None
-    
-    def __new__(cls, *args, **kwargs):
-        if not cls._instance:
-            cls._instance = super(MediStreamNLP, cls).__new__(cls, *args, **kwargs)
-            cls._instance._initialized = False
-        return cls._instance
+# Configure Gemini globally
+if GEMINI_API_KEY:
+    genai.configure(api_key=GEMINI_API_KEY)
 
-    def __init__(self):
-        if self._initialized:
-            return
-            
-        print("Initializing Global NLP Singletons...")
-        base_dir = os.path.dirname(os.path.abspath(__file__))
-        
-        intent_model_path = os.path.join(base_dir, "intent_distilbert")
-        priority_model_path = os.path.join(base_dir, "priority_distilbert")
-        
-        self.intent_pipeline = pipeline("text-classification", model=intent_model_path, tokenizer=intent_model_path)
-        self.priority_pipeline = pipeline("text-classification", model=priority_model_path, tokenizer=priority_model_path)
-        
-        self._initialized = True
-        print("NLP Engine Ready.")
+class NLPEntities(BaseModel):
+    assigned_to: Optional[str] = Field(None, description="Username of assignee from mention, without '@'")
+    task_code: Optional[str] = Field(None, description="Task code identifier (e.g., 'T-1023')")
+    title: Optional[str] = Field(None, description="Cleaned title of the task being created")
+    block_reason: Optional[str] = Field(None, description="Reason for blocking the task")
+    alert_message: Optional[str] = Field(None, description="Emergency description text")
 
-    def extract_mentions(self, text: str) -> str:
-        mentions = re.findall(r'@\w+', text)
-        return mentions[0].replace('@', '') if mentions else None
+class NLPResult(BaseModel):
+    intent: Literal["CREATE_TASK", "COMPLETE_TASK", "BLOCK_TASK", "ALERT", "OTHER"]
+    confidence: float
+    priority: Literal["LOW", "MEDIUM", "HIGH", "CRITICAL"]
+    entities: NLPEntities
 
-    def extract_task_code(self, text: str) -> str:
-        match = re.search(r'T-\d+', text, re.IGNORECASE)
-        return match.group(0).upper() if match else None
+system_prompt = """You are an expert clinical operations parser. Your job is to parse conversational text from medical staff and extract structured operational signals.
 
-    def _clean_text(self, text: str) -> str:
-        return re.sub(r'@[a-zA-Z0-9_]+', '', text).strip()
+Classify the text into one of these intents:
+1. CREATE_TASK: Staff member assigns a task to a user (e.g., "@NurseNeha please check bed 4").
+2. COMPLETE_TASK: Staff member reports a task code is finished (e.g., "T-102 is completed").
+3. BLOCK_TASK: Staff member reports a task is blocked by an obstacle (e.g., "T-204 blocked because lab results are missing").
+4. ALERT: Staff member reports an emergency (e.g., "Code blue in room 4" or "Need crash cart immediately").
+5. OTHER: For messages that do not contain operational instructions (e.g., "Thanks!", "Got it").
 
-    def process_message(self, text: str, user_id: str) -> dict:
-        """
-        Extracts structural signals and guarantees output contract structure.
-        Phase 3: NO GENAI. NO DB CALLS.
-        """
-        if not text or len(text.strip()) < 3:
-            return {"status": "invalid", "message": "Text too short"}
+Determine Priority:
+- CRITICAL: Emergency alerts, cardiac arrest, patient coding.
+- HIGH: Urgent tasks, immediate medications, significant blockers.
+- MEDIUM: Standard checks, reports, routine care.
+- LOW: Non-time-critical admin tasks, cleaning.
 
-        cleaned = self._clean_text(text)
-        
-        # Identify Intent via Local BERT
-        intent_res = self.intent_pipeline(cleaned)[0]
-        intent = intent_res['label']
-        confidence = intent_res['score']
-        
-        priority = None
-        entities = {}
-        
-        if intent == "CREATE_TASK":
-            prio_res = self.priority_pipeline(cleaned)[0]
-            priority = prio_res['label']
-            entities["assigned_to"] = self.extract_mentions(text)
-            entities["title"] = cleaned
-            
-        elif intent in ["COMPLETE_TASK", "BLOCK_TASK"]:
-            entities["task_code"] = self.extract_task_code(text)
-            if intent == "BLOCK_TASK":
-                block_parts = re.split(r'due to|because', cleaned, flags=re.IGNORECASE)
-                entities["block_reason"] = block_parts[1].strip() if len(block_parts) > 1 else "Unspecified operational blocker"
-                
-        elif intent == "ALERT":
-            prio_res = self.priority_pipeline(cleaned)[0]
-            priority = prio_res['label']
-            entities["alert_message"] = cleaned
+Extract Entities:
+- assigned_to: The username mentioned after '@' (e.g. from '@NurseNeha' extract 'NurseNeha').
+- task_code: The task number in the format 'T-XXXX' (e.g. 'T-1023').
+- title: The content/title of the task to create.
+- block_reason: The reason why a task is blocked (usually following 'because' or 'due to').
+- alert_message: The emergency warning message.
 
-        return {
-            "status": "success",
-            "intent": intent,
-            "confidence": confidence,
-            "priority": priority,
-            "entities": entities
-        }
-
-# Instantiate Singleton immediately so import is heavy, not router logic
-nlp_engine_instance = MediStreamNLP()
+Provide a confidence score between 0.0 and 1.0 representing your classification certainty.
+"""
 
 def process_message(text: str, user_id: str) -> dict:
-    """Wrapper exposing the standardized contract required by main.py"""
-    return nlp_engine_instance.process_message(text, user_id)
+    """
+    Extracts structural signals from the message using Gemini.
+    Returns the parsed intent, priority, entities, and confidence score.
+    """
+    if not text or len(text.strip()) < 3:
+        return {"status": "invalid", "message": "Text too short"}
+
+    # Base safe default to fallback to if the API fails
+    safe_default = {
+        "status": "success",
+        "intent": "OTHER",
+        "confidence": 0.0,
+        "priority": "LOW",
+        "entities": {}
+    }
+
+    if not GEMINI_API_KEY:
+        print("NLP Engine Error: Missing GEMINI_API_KEY")
+        return safe_default
+
+    try:
+        model = genai.GenerativeModel(
+            model_name="gemini-2.0-flash",
+            system_instruction=system_prompt,
+            generation_config={
+                "temperature": 0.1,
+            }
+        )
+        
+        # We request structured output matching NLPResult
+        response = model.generate_content(
+            f"Parse the following message:\n\n{text}",
+            generation_config=genai.GenerationConfig(
+                response_mime_type="application/json",
+                response_schema=NLPResult,
+                temperature=0.1,
+            )
+        )
+        
+        # Process the JSON string back to dictionary
+        result_json = response.text
+        result_dict = json.loads(result_json)
+        
+        return {
+            "status": "success",
+            "intent": result_dict.get("intent", "OTHER"),
+            "confidence": result_dict.get("confidence", 0.0),
+            "priority": result_dict.get("priority", "LOW"),
+            "entities": result_dict.get("entities", {})
+        }
+    except Exception as e:
+        print(f"NLP Engine Error: {str(e)}")
+        return safe_default
