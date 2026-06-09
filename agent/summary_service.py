@@ -46,20 +46,30 @@ def generate_shift_summary(shift_id: str) -> None:
 
         risk_score = shift.get("risk_score", 0)
 
-        prompt = f"""You are a hospital operations analyst.
-        
-Shift Summary Data:
-Total Tasks: {total_tasks}
-Completed Tasks: {completed_tasks}
-Blocked Tasks: {blocked_tasks}
-Pending Tasks: {pending_tasks}
-Active Alerts: {alerts_count}
-Final Risk Score: {risk_score}/10
+        prompt = f"""You are an expert clinical hospital supervisor. Generate a structured shift handoff report following the standard SBAR (Situation, Background, Assessment, Recommendation) communication protocol.
 
-Write a concise 3-sentence professional shift performance summary.
-Do not invent data.
-Do not speculate.
-Only describe based on numbers provided."""
+Use ONLY the following verified shift data. Do not make up facts or inject extra cases:
+- Total Tasks Logged: {total_tasks}
+- Completed Tasks: {completed_tasks}
+- Blocked Tasks: {blocked_tasks}
+- Pending Tasks: {pending_tasks}
+- Active Alerts Raised: {alerts_count}
+- Live Risk Score: {risk_score}/10
+
+Strictly format the output as follows:
+### SBAR Shift Handoff Report
+
+**S (Situation):**
+[1-2 sentences summarizing the current state of the ward, referencing active alerts and overall status]
+
+**B (Background):**
+[1-2 sentences on task volume, completed tasks, and pending work during this shift]
+
+**A (Assessment):**
+[1-2 sentences evaluating the operational risk level, noting why tasks are blocked or what the risk score implies]
+
+**R (Recommendation):**
+[1-2 concrete, action-oriented bullet points for the incoming shift team to prioritize first]"""
 
         ai_summary = ""
         # Wrap Gemini call in error handler so it doesn't crash the server shift end

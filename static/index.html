@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediStream Clinical Dashboard</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --glass-bg: rgba(30, 41, 59, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #38bdf8;
+            --risk-low: #4ade80;
+            --risk-med: #facc15;
+            --risk-high: #f87171;
+            --risk-critical: #ef4444;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-image: radial-gradient(circle at top left, rgba(56, 189, 248, 0.1) 0%, transparent 40%),
+                              radial-gradient(circle at bottom right, rgba(239, 68, 68, 0.05) 0%, transparent 40%);
+        }
+
+        /* Glassmorphic Utilities */
+        .glass {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        header {
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--glass-border);
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .shift-monitor h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 0.25rem;
+        }
+
+        .shift-monitor p {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        .alert-banner {
+            display: none;
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid var(--risk-critical);
+            color: #fecaca;
+            padding: 1rem 2rem;
+            text-align: center;
+            font-weight: 600;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 2rem;
+            padding: 2rem;
+            flex-grow: 1;
+        }
+
+        /* Kanban Board */
+        .kanban {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+        }
+
+        .column {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .column-header {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--glass-border);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .task-card {
+            padding: 1rem;
+            transition: transform 0.2s;
+        }
+
+        .task-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+
+        .task-code {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .task-priority {
+            font-size: 0.75rem;
+            padding: 0.125rem 0.375rem;
+            border-radius: 999px;
+            font-weight: 600;
+        }
+
+        .prio-CRITICAL { background: rgba(239, 68, 68, 0.2); color: var(--risk-critical); }
+        .prio-HIGH { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
+        .prio-MEDIUM { background: rgba(56, 189, 248, 0.2); color: var(--accent); }
+        .prio-LOW { background: rgba(74, 222, 128, 0.2); color: var(--risk-low); }
+
+        .task-title {
+            font-size: 0.95rem;
+            margin-bottom: 0.75rem;
+            line-height: 1.4;
+        }
+
+        .task-assignee {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        /* Sidebar & Simulator */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .risk-gauge {
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .risk-gauge h2 {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+        }
+
+        .gauge-container {
+            position: relative;
+            width: 150px;
+            height: 75px;
+            margin: 0 auto;
+            overflow: hidden;
+        }
+
+        .gauge-background {
+            width: 150px;
+            height: 150px;
+            background: var(--glass-border);
+            border-radius: 50%;
+            position: absolute;
+        }
+
+        .gauge-fill {
+            width: 150px;
+            height: 150px;
+            background: conic-gradient(from 180deg, var(--risk-low) 0deg, var(--risk-med) 90deg, var(--risk-critical) 180deg);
+            border-radius: 50%;
+            position: absolute;
+            clip-path: polygon(0 50%, 100% 50%, 100% 100%, 0 100%);
+            transform: rotate(0deg); /* 0 to 180 */
+            transform-origin: center;
+            transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .gauge-center {
+            width: 110px;
+            height: 110px;
+            background: var(--bg-color);
+            border-radius: 50%;
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding-top: 20px;
+        }
+
+        .risk-score {
+            font-size: 2.5rem;
+            font-weight: 800;
+        }
+
+        .simulator-panel {
+            padding: 1.5rem;
+        }
+
+        .simulator-panel h2 {
+            font-size: 1.1rem;
+            color: var(--accent);
+            margin-bottom: 1rem;
+            border-bottom: 1px solid var(--glass-border);
+            padding-bottom: 0.5rem;
+        }
+
+        .sim-btn {
+            width: 100%;
+            padding: 0.75rem;
+            margin-bottom: 0.75rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            color: var(--text-main);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .sim-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .sim-btn.danger:hover {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: var(--risk-critical);
+        }
+
+        .sim-btn.end-shift {
+            background: rgba(56, 189, 248, 0.1);
+            border-color: var(--accent);
+            color: var(--accent);
+            margin-top: 1rem;
+        }
+
+        .sim-btn.end-shift:hover {
+            background: rgba(56, 189, 248, 0.2);
+        }
+
+        /* Voice Dictation */
+        .voice-control {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.75rem 1.5rem;
+            border-radius: 999px;
+            z-index: 100;
+        }
+
+        .mic-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--accent);
+            border: none;
+            color: var(--bg-color);
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .mic-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.5);
+        }
+
+        .mic-btn.recording {
+            background: var(--risk-critical);
+            animation: pulse-red 1.5s infinite;
+        }
+
+        @keyframes pulse-red {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.6); }
+            70% { box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+
+        .voice-status {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 2.5rem;
+        }
+
+        .modal-content h2 {
+            color: var(--accent);
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-content .markdown-body {
+            line-height: 1.6;
+            color: var(--text-main);
+        }
+
+        .modal-content .markdown-body h3 { margin-top: 1.5rem; margin-bottom: 0.75rem; color: #fff;}
+        .modal-content .markdown-body p { margin-bottom: 1rem; }
+        .modal-content .markdown-body strong { color: var(--accent); }
+        .modal-content .markdown-body ul { margin-left: 1.5rem; margin-bottom: 1rem; }
+
+        .close-modal {
+            margin-top: 2rem;
+            padding: 0.75rem 1.5rem;
+            background: var(--glass-border);
+            border: none;
+            color: #fff;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .close-modal:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        /* Utility */
+        #system-logs {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 1rem;
+            max-height: 100px;
+            overflow-y: auto;
+            padding: 0.5rem;
+            background: rgba(0,0,0,0.3);
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="alert-banner" id="alert-banner">
+        ⚠️ CRITICAL ALERT: Emergency broadcast active. Please check the ward immediately.
+    </div>
+
+    <header>
+        <div class="shift-monitor">
+            <h1>MediStream Control Center</h1>
+            <p id="shift-info">Active Shift: -- | Supervisor: --</p>
+        </div>
+        <div style="display: flex; gap: 1rem; align-items: center;">
+            <div id="connection-status" style="width: 10px; height: 10px; border-radius: 50%; background: var(--risk-low);"></div>
+            <span style="font-size: 0.875rem; color: var(--text-muted);">System Online</span>
+        </div>
+    </header>
+
+    <div class="main-layout">
+        <!-- Kanban -->
+        <main class="kanban">
+            <div class="column" id="col-TODO">
+                <div class="column-header">To Do</div>
+                <div class="task-list" id="list-TODO"></div>
+            </div>
+            <div class="column" id="col-IN_PROGRESS">
+                <div class="column-header">In Progress</div>
+                <div class="task-list" id="list-IN_PROGRESS"></div>
+            </div>
+            <div class="column" id="col-BLOCKED">
+                <div class="column-header">Blocked</div>
+                <div class="task-list" id="list-BLOCKED"></div>
+            </div>
+            <div class="column" id="col-DONE">
+                <div class="column-header">Done</div>
+                <div class="task-list" id="list-DONE"></div>
+            </div>
+        </main>
+
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="glass risk-gauge">
+                <h2>Live Risk Score</h2>
+                <div class="gauge-container">
+                    <div class="gauge-background"></div>
+                    <div class="gauge-fill" id="gauge-fill"></div>
+                    <div class="gauge-center">
+                        <span class="risk-score" id="risk-score-display">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass simulator-panel">
+                <h2>Judge's Demo Board</h2>
+                <button class="sim-btn danger" onclick="simulateAlert()">Trigger Code Blue</button>
+                <button class="sim-btn" onclick="simulateTask()">Assign Nurse Task</button>
+                <button class="sim-btn" onclick="simulateBlocker()">Simulate Blocker</button>
+                <button class="sim-btn end-shift" onclick="endShift()">End & Summarize Shift</button>
+
+                <div id="system-logs">System ready.</div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Voice Control -->
+    <div class="glass voice-control">
+        <button class="mic-btn" id="mic-btn">🎙️</button>
+        <span class="voice-status" id="voice-status">Click to dictate command...</span>
+    </div>
+
+    <!-- SBAR Modal -->
+    <div class="modal-overlay" id="sbar-modal">
+        <div class="glass modal-content">
+            <h2>Shift Handoff Report</h2>
+            <div class="markdown-body" id="sbar-content">
+                Loading summary...
+            </div>
+            <button class="close-modal" onclick="closeModal()">Close Handoff</button>
+        </div>
+    </div>
+
+    <!-- Minimal Markdown Parser for SBAR -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <script>
+        const API_BASE = 'http://localhost:8000';
+        let currentTasks = [];
+        let taskCounter = 1000; // For simulation
+
+        // --- Core UI Updates ---
+
+        function logAction(msg) {
+            const logs = document.getElementById('system-logs');
+            logs.innerHTML = `<div>> ${msg}</div>` + logs.innerHTML;
+        }
+
+        async function fetchShiftStatus() {
+            try {
+                const res = await fetch(`${API_BASE}/shift/status`);
+                const data = await res.json();
+                if (data.status === 'success') {
+                    const shift = data.data;
+                    document.getElementById('shift-info').innerText = `Active Shift: ${shift.shift_name} | Supervisor: Dr. Gregory House`;
+                    updateGauge(shift.risk_score);
+
+                    if (shift.is_high_risk) {
+                        document.getElementById('alert-banner').style.display = 'block';
+                    } else {
+                        document.getElementById('alert-banner').style.display = 'none';
+                    }
+                }
+            } catch (e) {
+                console.error("Status fetch failed", e);
+            }
+        }
+
+        async function fetchTasks() {
+            try {
+                const res = await fetch(`${API_BASE}/shift/tasks`);
+                const data = await res.json();
+                if (data.status === 'success') {
+                    currentTasks = data.data;
+                    renderKanban();
+                }
+            } catch (e) {
+                console.error("Tasks fetch failed", e);
+            }
+        }
+
+        function updateGauge(score) {
+            const display = document.getElementById('risk-score-display');
+            const fill = document.getElementById('gauge-fill');
+            display.innerText = score;
+
+            // Map 0-10 to 0-180 degrees
+            const degrees = (score / 10) * 180;
+            fill.style.transform = `rotate(${degrees}deg)`;
+
+            if (score >= 8) display.style.color = 'var(--risk-critical)';
+            else if (score >= 5) display.style.color = 'var(--risk-med)';
+            else display.style.color = 'var(--text-main)';
+        }
+
+        function renderKanban() {
+            const lists = {
+                'TODO': document.getElementById('list-TODO'),
+                'IN_PROGRESS': document.getElementById('list-IN_PROGRESS'),
+                'BLOCKED': document.getElementById('list-BLOCKED'),
+                'DONE': document.getElementById('list-DONE')
+            };
+
+            Object.values(lists).forEach(el => el.innerHTML = '');
+
+            currentTasks.forEach(task => {
+                const card = document.createElement('div');
+                card.className = 'glass task-card';
+                card.innerHTML = `
+                    <div class="task-header">
+                        <span class="task-code">${task.task_code || 'T-???'}</span>
+                        <span class="task-priority prio-${task.priority}">${task.priority}</span>
+                    </div>
+                    <div class="task-title">${task.title}</div>
+                    <div class="task-assignee">👤 @${task.assigned_to}</div>
+                `;
+                if(lists[task.status]) {
+                    lists[task.status].appendChild(card);
+                }
+            });
+        }
+
+        // --- Voice Command API (Phase 4) ---
+
+        const micBtn = document.getElementById('mic-btn');
+        const voiceStatus = document.getElementById('voice-status');
+
+        let recognition = null;
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            recognition.continuous = false;
+            recognition.interimResults = false;
+
+            recognition.onstart = () => {
+                micBtn.classList.add('recording');
+                voiceStatus.innerText = "Listening...";
+            };
+
+            recognition.onresult = async (event) => {
+                const transcript = event.results[0][0].transcript;
+                voiceStatus.innerText = `Sending: "${transcript}"`;
+                await sendChatMessage(transcript);
+                voiceStatus.innerText = "Click to dictate command...";
+            };
+
+            recognition.onerror = (event) => {
+                voiceStatus.innerText = "Dictation failed. Try again.";
+                micBtn.classList.remove('recording');
+            };
+
+            recognition.onend = () => {
+                micBtn.classList.remove('recording');
+            };
+
+            micBtn.addEventListener('click', () => {
+                if(micBtn.classList.contains('recording')) {
+                    recognition.stop();
+                } else {
+                    recognition.start();
+                }
+            });
+        } else {
+            voiceStatus.innerText = "Speech API not supported in this browser.";
+            micBtn.style.opacity = '0.5';
+            micBtn.style.cursor = 'not-allowed';
+        }
+
+        async function sendChatMessage(message) {
+            try {
+                logAction(`Chat sent: ${message}`);
+                const res = await fetch(`${API_BASE}/chat`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message })
+                });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    logAction(`System: ${data.message}`);
+                    await fetchTasks();
+                    await fetchShiftStatus();
+                } else {
+                    logAction(`Error: ${data.message || data.detail}`);
+                }
+            } catch (e) {
+                logAction("Network error sending message.");
+            }
+        }
+
+        // --- Simulator Buttons (Phase 5) ---
+
+        async function simulateAlert() {
+            await sendChatMessage("Patient coding in Room 402, need immediate crash cart!");
+        }
+
+        async function simulateTask() {
+            taskCounter++;
+            await sendChatMessage(`@NurseNeha please prepare discharge summary for bed ${taskCounter} immediately`);
+        }
+
+        async function simulateBlocker() {
+            // Find a random incomplete task to block
+            const taskToBlock = currentTasks.find(t => t.status !== 'DONE' && t.status !== 'BLOCKED');
+            if (taskToBlock) {
+                await sendChatMessage(`${taskToBlock.task_code} is blocked because patient is dizzy and blood pressure is dropping`);
+            } else {
+                logAction("No available tasks to block. Create one first.");
+            }
+        }
+
+        async function endShift() {
+            logAction("Ending shift and generating AI Summary...");
+            try {
+                const res = await fetch(`${API_BASE}/shift/end`, { method: 'POST' });
+                const data = await res.json();
+
+                if (data.status === 'success') {
+                    logAction("Shift ended.");
+                    document.getElementById('sbar-modal').style.display = 'flex';
+
+                    const summaryMarkdown = data.summary || "No summary available.";
+                    document.getElementById('sbar-content').innerHTML = marked.parse(summaryMarkdown);
+
+                }
+            } catch (e) {
+                logAction("Error ending shift.");
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('sbar-modal').style.display = 'none';
+            // Reset for next shift
+            fetchShiftStatus();
+            fetchTasks();
+        }
+
+        // Init
+        setInterval(fetchShiftStatus, 5000);
+        setInterval(fetchTasks, 5000);
+        fetchShiftStatus();
+        fetchTasks();
+    </script>
+</body>
+</html>

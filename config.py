@@ -6,6 +6,7 @@ load_dotenv(find_dotenv(usecwd=True))
 
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_SERVICE_ROLE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 if not SUPABASE_URL:
     raise EnvironmentError("SUPABASE_URL is missing from environment variables.")

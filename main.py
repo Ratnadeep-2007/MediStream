@@ -1,5 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from db_service import check_db_connection, get_active_shift, get_shift_tasks, end_active_shift, update_task_status, create_task, supabase
 
@@ -16,6 +18,13 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Mount static files
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
+@app.get("/", response_class=FileResponse)
+async def read_index():
+    return "static/index.html"
 
 @app.on_event("startup")
 def startup_event():
@@ -306,8 +315,16 @@ def shift_end():
     # 2. Trigger Generative AI 
     generate_shift_summary(shift_id_closing)
 
+    # 3. Fetch the newly created summary to return to the UI
+    try:
+        summary_res = supabase.table("shift_summaries").select("ai_summary").eq("shift_id", shift_id_closing).execute()
+        ai_summary_text = summary_res.data[0]["ai_summary"] if summary_res.data else "Summary generation pending or failed."
+    except Exception as e:
+        ai_summary_text = "Could not fetch summary from DB."
+
     return {
         "status": "success",
         "message": "Shift ended safely. Summary generated.",
-        "data": data
+        "data": data,
+        "summary": ai_summary_text
     }
